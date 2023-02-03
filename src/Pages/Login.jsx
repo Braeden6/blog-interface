@@ -1,6 +1,7 @@
-import { TextField, Button, Grid, FormLabel } from "@mui/material";
+import { TextField, Button } from "@mui/material";
 import { useState } from "react";
 import { sha256 } from "js-sha256";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -8,6 +9,7 @@ import { sha256 } from "js-sha256";
 
 
 const Login = () => {
+    const navigate = useNavigate();
   const [serverSalt, setServerSalt] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState(null);
@@ -21,11 +23,13 @@ const Login = () => {
   }, []);
 
   const loginHandler = () => {
+    
     if (!username || !password) return;
+    const clientSalt = (Math.random() + 1).toString(36).substring(8);
     const params = {
       username: username,
-      password:  sha256(serverSalt.salt + sha256(password) + "1234"),
-      clientSalt: "1234",
+      password:  sha256(serverSalt.salt + sha256(password) + clientSalt),
+      clientSalt: clientSalt,
     };
     fetch(
       "http://localhost:8000/login?" + new URLSearchParams(params).toString(),
@@ -33,8 +37,13 @@ const Login = () => {
         method: "POST",
       }
     )
-      .then((res) => res.json())
-      .then((data) => console.log(data));
+      .then((res) =>  {
+        if (res.status === 200) {
+          // redirect to home page
+          navigate("/home");
+        } 
+      })
+      //.then((data) => console.log(data));
   };
 
   return (
