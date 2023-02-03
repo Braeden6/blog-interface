@@ -37,13 +37,8 @@ const Login = () => {
         method: "POST",
       }
     )
-      .then((res) =>  {
-        if (res.status === 200) {
-          // redirect to home page
-          navigate("/home");
-        } 
-      })
-      //.then((data) => console.log(data));
+      .then((res) =>  res.status === 200 ? res.json(): null)
+      .then((data) => {if (data !== null) navigate("/home", { state: data })});
   };
 
   return (
