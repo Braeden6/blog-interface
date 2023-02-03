@@ -1,7 +1,7 @@
 import { TextField, Button } from "@mui/material";
 import { useState } from "react";
 import { sha256 } from "js-sha256";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 
 
@@ -61,6 +61,7 @@ const Login = () => {
           <Button variant="contained" onClick={loginHandler}>
             Submit
           </Button>
+          <Link to="/registration">Click here to create account</Link>
         </>
       )}
     </>
