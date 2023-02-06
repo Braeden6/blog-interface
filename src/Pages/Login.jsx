@@ -2,6 +2,7 @@ import { TextField, Button } from "@mui/material";
 import { useState } from "react";
 import { sha256 } from "js-sha256";
 import { Link, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 
 
@@ -9,10 +10,11 @@ import { Link, useNavigate } from "react-router-dom";
 
 
 const Login = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [serverSalt, setServerSalt] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState(null);
+  const [cookies, setCookie] = useCookies(['token']);
 
   useState(() => {
     fetch("http://localhost:8000/login", {
@@ -23,22 +25,29 @@ const Login = () => {
   }, []);
 
   const loginHandler = () => {
-    
     if (!username || !password) return;
+
     const clientSalt = (Math.random() + 1).toString(36).substring(8);
     const params = {
+      clientSalt: clientSalt,
+    };
+    const body = {
       username: username,
       password:  sha256(serverSalt.salt + sha256(password) + clientSalt),
-      clientSalt: clientSalt,
     };
     fetch(
       "http://localhost:8000/login?" + new URLSearchParams(params).toString(),
       {
         method: "POST",
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(body),
       }
     )
       .then((res) =>  res.status === 200 ? res.json(): null)
-      .then((data) => {if (data !== null) navigate("/home", { state: data })});
+      .then((data) => {if (data !== null) {
+        setCookie('token', data.token, { path: '/' });
+        navigate("/home", { state: data })
+  }});
   };
 
   return (
