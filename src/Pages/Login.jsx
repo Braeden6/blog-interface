@@ -46,6 +46,7 @@ const Login = () => {
       .then((res) =>  res.status === 200 ? res.json(): null)
       .then((data) => {if (data !== null) {
         setCookie('token', data.token, { path: '/' });
+        setCookie('user_id', data.id, { path: '/' });
         navigate("/home", { state: data })
   }});
   };
