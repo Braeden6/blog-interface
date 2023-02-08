@@ -123,6 +123,7 @@ const Comment = (props) => {
             {open ? <ExpandLess /> : <ExpandMore />}
           </Button>
           <Collapse in={open} unmountOnExit>
+            {comment.sub_comments !== undefined && 
             <List>
               {comment.sub_comments.map((sub_comment, idx) => (
                 <Comment
@@ -130,7 +131,7 @@ const Comment = (props) => {
                   updateComment={(sub_comment) => updateSubComment(sub_comment, idx)}
                 />
               ))}
-            </List>
+            </List>}
           </Collapse>
         </div>
       </Card>

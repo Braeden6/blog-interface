@@ -1,4 +1,4 @@
-import { Button, Collapse, Divider, List, Stack } from "@mui/material";
+import { Button, Collapse, Divider, List, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import { useCookies } from "react-cookie";
 import { useParams } from "react-router-dom";
@@ -16,6 +16,8 @@ const ViewPost = () => {
   const { slug } = useParams();
   const [cookie, setCookie] = useCookies(["token", "user_id"]);
   const [postContent, setPostContent] = useState(null);
+  const [enabledReply, setEnabledReply] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
 
   console.log(cookie.token);
 
@@ -45,6 +47,27 @@ const ViewPost = () => {
       });
   };
 
+  const postCommentHandler = () => {
+    const params = {
+      token: cookie.token,
+      comment: replyContent
+    }
+    fetch("http://localhost:8000/post/" + postContent.id + "/comment?" + new URLSearchParams(params).toString(), {
+      method: "POST"
+    })
+    .then(res => res.json())
+    .then(data => {
+
+      let newPostContent = {...postContent};
+      newPostContent.comments.push(data);
+      console.log(newPostContent)
+      setPostContent(newPostContent);
+      setReplyContent("");
+      setEnabledReply(false);
+    }
+    )
+  };
+
 
 
   // count upvotes in post
@@ -69,6 +92,7 @@ const ViewPost = () => {
       </Stack>
     );
   };
+
   // fetch post data from slug
   useState(() => {
     const params = {
@@ -128,7 +152,7 @@ const ViewPost = () => {
               })}
             </h2>
             <div>
-              <Button>Reply</Button>
+              <Button onClick={() => setEnabledReply(!enabledReply)}>Reply</Button>
             {postContent.author.id == cookie.user_id && (
               <>
                 <Button>Edit Post</Button>
@@ -141,6 +165,15 @@ const ViewPost = () => {
             {getVotes(postContent.votes, postVoteHandler)}
           </div>
           <Divider />
+          {enabledReply && <div><TextField
+          fullWidth
+          id="outlined-basic"
+          label="Comment"
+          variant="outlined"
+          onChange={(e) => setReplyContent(e.target.value)}
+        />
+        <Button onClick={postCommentHandler}>Submit</Button>
+        </div>}
           {postContent.comments.map((comment, idx) => {
             return (
               <Comment comment={comment} idx= {idx} updateComment={(newComment) => updateComment(newComment,idx)} deleteComment={() => deleteComment(idx)} />
