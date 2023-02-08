@@ -1,11 +1,12 @@
-import { Button, Divider } from "@mui/material";
+import { Button, Collapse, Divider, List, Stack } from "@mui/material";
 import { useState } from "react";
 import { useCookies } from "react-cookie";
 import { useParams } from "react-router-dom";
-import ThumbUpTwoToneIcon from '@mui/icons-material/ThumbUpTwoTone';
-import ThumbDownTwoToneIcon from '@mui/icons-material/ThumbDownOffAltTwoTone';
-import ThumbUpRoundedIcon from '@mui/icons-material/ThumbUpAltRounded';
-import ThumbDownRoundedIcon from '@mui/icons-material/ThumbDownRounded';
+import ThumbUpTwoToneIcon from "@mui/icons-material/ThumbUpTwoTone";
+import ThumbDownTwoToneIcon from "@mui/icons-material/ThumbDownOffAltTwoTone";
+import ThumbUpRoundedIcon from "@mui/icons-material/ThumbUpAltRounded";
+import ThumbDownRoundedIcon from "@mui/icons-material/ThumbDownRounded";
+import Comment from "./Comment";
 
 // if i am author show edit and delete button
 // add callbacks to upvote and downvote
@@ -20,46 +21,29 @@ const ViewPost = () => {
 
   if (cookie.token == null) return <h1>Please Login</h1>;
 
-const postVoteHandler = (isUpVote, isUndo) => { 
+  const postVoteHandler = (isUpVote, isUndo) => {
     const params = {
-        token: cookie.token,
-    }
+      token: cookie.token,
+    };
     const voteType = isUpVote ? "/upvote" : "/downvote";
     const undo = isUndo ? "/undo?" : "?";
-    fetch("http://localhost:8000/post/" + postContent.id + voteType + undo + new URLSearchParams(params).toString(), {
+    fetch(
+      "http://localhost:8000/post/" +
+        postContent.id +
+        voteType +
+        undo +
+        new URLSearchParams(params).toString(),
+      {
         method: "POST",
-    })
-    .then(res => res.json())
-    .then(data => {
-        let newPostContent = {...postContent};
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        let newPostContent = { ...postContent };
         newPostContent.votes = data;
         setPostContent(newPostContent);
-    })
-};
-
-const commentVoteHandler = (commentID, isUpVote, isUndo) => { 
-  const params = {
-      token: cookie.token,
-  }
-  const voteType = isUpVote ? "/upvote" : "/downvote";
-  const undo = isUndo ? "/undo?" : "?";
-  fetch("http://localhost:8000/post/comment/" + commentID + voteType + undo + new URLSearchParams(params).toString(), {
-      method: "POST",
-  })
-  .then(res => res.json())
-  .then(data => {
-      let newPostContent = {...postContent};
-      let newComments = [...postContent.comments];
-      for (let comment of newComments) {
-          if (comment.id === commentID) {
-              comment.votes = data;
-          }
-      }
-      newPostContent.comments = newComments;
-      setPostContent(newPostContent);
-  })
-};
-
+      });
+  };
 
 
 
@@ -68,16 +52,21 @@ const commentVoteHandler = (commentID, isUpVote, isUndo) => {
     let count = 0;
     let voted = 0;
     for (let vote in votes) {
-       if (votes[vote].user_id == cookie.user_id) voted = votes[vote].vote ? 1 : -1;
+      if (votes[vote].user_id == cookie.user_id)
+        voted = votes[vote].vote ? 1 : -1;
       count += votes[vote].vote ? 1 : -1;
     }
 
     return (
-      <div>
-       <Button onClick={() => voteHandler(true, voted === 1)}> {voted === 1 ? <ThumbUpRoundedIcon/>: <ThumbUpTwoToneIcon />}</Button>
+      <Stack direction="row">
+        <Button onClick={() => voteHandler(true, voted === 1)}>
+          {voted === 1 ? <ThumbUpRoundedIcon /> : <ThumbUpTwoToneIcon />}
+        </Button>
         <h3>{count}</h3>
-        <Button onClick={() => voteHandler(false, voted === -1)}>{voted === -1 ?<ThumbDownRoundedIcon/> :  <ThumbDownTwoToneIcon/>}</Button>
-      </div>
+        <Button onClick={() => voteHandler(false, voted === -1)}>
+          {voted === -1 ? <ThumbDownRoundedIcon /> : <ThumbDownTwoToneIcon />}
+        </Button>
+      </Stack>
     );
   };
   // fetch post data from slug
@@ -100,6 +89,19 @@ const commentVoteHandler = (commentID, isUpVote, isUndo) => {
         setPostContent(data);
       });
   }, []);
+
+
+  const updateComment = (comment, idx) => {
+    let newPostContent = { ...postContent };
+    newPostContent.comments[idx] = comment;
+    setPostContent(newPostContent);
+  };
+
+  const deleteComment = (idx) => {
+    let newPostContent = { ...postContent };
+    newPostContent.comments.splice(idx, 1);
+    setPostContent(newPostContent);
+  };
 
   const displayPostContent = () => {
     console.log(postContent);
@@ -125,20 +127,23 @@ const commentVoteHandler = (commentID, isUpVote, isUndo) => {
                   return <img key={idx} src={content.url} alt="post content" />;
               })}
             </h2>
+            <div>
+              <Button>Reply</Button>
+            {postContent.author.id == cookie.user_id && (
+              <>
+                <Button>Edit Post</Button>
+                <Button onClick={() => console.log("dlete")}>
+                  Delete Post
+                </Button>
+              </>
+            )}
+            </div>
             {getVotes(postContent.votes, postVoteHandler)}
           </div>
           <Divider />
           {postContent.comments.map((comment, idx) => {
             return (
-              <div key={idx}>
-                <p>
-                  Author: {comment.author.first_name} {comment.author.last_name}
-                </p>
-                <p>Created: {comment.created}</p>
-                {comment.updated && <p>Updated: {comment.updated}</p>}
-                {getVotes(comment.votes, (isUpVote, isUndo) => commentVoteHandler(comment.id, isUpVote, isUndo))}
-                <h2>{comment.comment}</h2>
-              </div>
+              <Comment comment={comment} idx= {idx} updateComment={(newComment) => updateComment(newComment,idx)} deleteComment={() => deleteComment(idx)} />
             );
           })}
         </>
