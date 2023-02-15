@@ -4,6 +4,7 @@ import Home from './Pages/Home';
 import Registration from './Pages/Registration';
 import NewPost from './Pages/NewPost';
 import ViewPost from './Pages/ViewPost';
+import Admin from './Pages/Admin';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/registration" element={<Registration/>} />
         <Route path="/newPost" element={<NewPost/>} />
         <Route path="/viewPost/:slug" element={<ViewPost/>} />
+        <Route path="/admin" element={<Admin/>} />
       </Routes>
   )
 }
