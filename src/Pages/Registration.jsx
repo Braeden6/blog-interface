@@ -17,7 +17,7 @@ const Registration = () => {
       return;
     const body = {
       email: username,
-      password: sha256(password),
+      password: password,
       first_name: firstName,
       last_name: lastName,
       middle_name: middleName,
