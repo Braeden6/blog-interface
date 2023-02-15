@@ -60,7 +60,8 @@ const ViewPost = () => {
       token: cookie.token,
       comment: replyContent,
     };
-    fetch( "http://localhost:8000/blog/post/" + postContent.id + "/comment/create?" + new URLSearchParams(params).toString(), {
+    const url = enableComment ? "comment" : "answer";
+    fetch( "http://localhost:8000/blog/post/" + postContent.id + "/" + url + "/create?" + new URLSearchParams(params).toString(), {
       method: "POST",
   })
   .then(res => console.log(res.status))
