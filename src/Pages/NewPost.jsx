@@ -26,7 +26,7 @@ const NewPost = () => {
       token: cookie.token,
     };
     fetch(
-      "http://localhost:8000/post/create?" +
+      "http://localhost:8000/blog/post/create?" +
         new URLSearchParams(params).toString(),
       {
         method: "GET",
@@ -59,7 +59,7 @@ const NewPost = () => {
       post_content: postContent,
       technology_ids: tag_ids,
     };
-    fetch("http://localhost:8000/post/create", {
+    fetch("http://localhost:8000/blog/post/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
